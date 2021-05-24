@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 
 namespace GradeBook {
-  class Book {
+  public class Book {
 
     List<double> grades;
+    public string Name;
     
-    public Book() {
+    public Book(string name) {
       grades = new List<double>();
+      Name = name;
     }
 
     public void AddGrade(double grade) {
@@ -21,19 +23,23 @@ namespace GradeBook {
       return new List<double>();
     }
 
-    public void ShowStatistics() {
+    public Statistics GetStatistics() {
+      
       var avg = 0.0;
       var highest = double.MinValue;
       var lowest = double.MaxValue;
       var median = 50.0;
+      
       foreach(var grade in grades) {
         highest = Math.Max(grade, highest);
         lowest = Math.Min(grade, lowest);
         avg += grade;
       }
+      
       median = grades[grades.Count / 2];
       avg /= grades.Count;
-      Console.WriteLine($"Average: {avg:N1}\nHighest: {highest}\nLowest: {lowest}\nMedian: {median}");
+      
+      return new Statistics(avg, highest,lowest);
     }
 
   }
