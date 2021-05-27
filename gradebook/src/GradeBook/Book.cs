@@ -1,21 +1,77 @@
 using System;
 using System.Collections.Generic;
 
-namespace GradeBook {
-  public class Book {
+namespace GradeBook 
+{
+  // event delegate
+  public delegate void GradeAddedDelegate(object sender, EventArgs args); 
 
-    List<double> grades;
-    public string Name;
-    
-    public Book(string name) {
-      grades = new List<double>();
+  public class NamedObject 
+  {
+    public NamedObject(string name)
+    {
       Name = name;
     }
 
-    public void AddGrade(double grade) { // c# looks at method name and
+    public string Name { // auto property 
+      get; // can be made private by using private keyword
+      set;
+    }
+  }
+
+  public interface IBook
+  {
+    void AddGrade(double grade);
+    Statistics GetStatistics();
+    string Name {get;}
+    event GradeAddedDelegate GradeAddedDelegate;
+  }
+
+  public abstract class Book : NamedObject
+  {
+    protected Book(string name) : base(name)
+    {
+    }
+
+    public abstract void AddGrade(double grade);
+  }
+
+
+  public class InMemoryBook : Book 
+  {
+
+    List<double> grades;
+    public event GradeAddedDelegate GradeAdded;
+
+  // Original way of creating property property:
+    // public string Name {
+    //   get {                  //explicitly set what getter and setter does
+    //     return name;
+    //   }
+    //   set {
+    //     if(!String.IsNullOrEmpty(value))
+    //       name = value;
+    //     else
+    //       throw new ArgumentException("");
+    //   }
+    // }
+    // private string name;       // declare variable property is tied to
+
+    public InMemoryBook(string name) : base(name) {
+      grades = new List<double>();
+      // Name = name;
+    }
+
+    // readonly string category = ""; // can only be set in constructor
+    // const string CATEGORY = "";    // cannot be reset once initialized. treated as static.
+
+    public override void AddGrade(double grade) { // c# looks at method name and
                                          // parameter type as method's signature
-      if (grade <= 100 && grade >= 0) {
+      if(grade <= 100 && grade >= 0) {
         grades.Add(grade);
+        if(GradeAdded != null) {
+          GradeAdded(this, new EventArgs());
+        }
       } else {
         throw new ArgumentException();
       }
@@ -81,5 +137,8 @@ namespace GradeBook {
 
       return new Statistics(avg, highest, lowest, letter);
     }
+
+    
+
   }
 }
