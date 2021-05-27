@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Collections.Generic;
 
 namespace GradeBook 
@@ -13,8 +14,8 @@ namespace GradeBook
       Name = name;
     }
 
-    public string Name { // auto property 
-      get; // can be made private by using private keyword
+    public string Name { // * auto property 
+      get; // * can be made private by using private keyword
       set;
     }
   }
@@ -22,26 +23,35 @@ namespace GradeBook
   public interface IBook
   {
     void AddGrade(double grade);
+    void AddGrade(string letter);
     Statistics GetStatistics();
+    List<double> GetGrades();
+
     string Name {get;}
-    event GradeAddedDelegate GradeAddedDelegate;
+    event GradeAddedDelegate GradeAdded;
   }
 
-  public abstract class Book : NamedObject
+  public abstract class Book : NamedObject, IBook
   {
-    protected Book(string name) : base(name)
-    {
-    }
+    protected Book(string name) : base(name) {}
+
+    public abstract event GradeAddedDelegate GradeAdded;
 
     public abstract void AddGrade(double grade);
+
+    public abstract void AddGrade(string letter);
+
+    public abstract List<double> GetGrades();
+
+    public abstract Statistics GetStatistics();
   }
 
 
-  public class InMemoryBook : Book 
+  public class InMemoryBook : Book
   {
 
     List<double> grades;
-    public event GradeAddedDelegate GradeAdded;
+    public override event GradeAddedDelegate GradeAdded;
 
   // Original way of creating property property:
     // public string Name {
@@ -77,19 +87,19 @@ namespace GradeBook
       }
     }
 
-    public void AddGrade(char letter) {
+    public override void AddGrade(string letter) {
       switch(letter) 
       {
-        case var le when le == 'A' || le == 'a':
+        case var le when le == "A" || le == "a":
           AddGrade(90.0);
           break;
-        case var le when le == 'B' || le == 'b':
+        case var le when le == "B" || le == "b":
           AddGrade(80.0);
           break;
-        case var le when le == 'C' || le == 'c':
+        case var le when le == "C" || le == "c":
           AddGrade(70.0);
           break;
-        case var le when le == 'D' || le == 'd':
+        case var le when le == "D" || le == "d":
           AddGrade(60.0);
           break;
         default:
@@ -98,11 +108,11 @@ namespace GradeBook
       }
     }
 
-    public List<double> GetGrades() {
+    public override List<double> GetGrades() {
       return grades;
     }
 
-    public Statistics GetStatistics() {
+    public override Statistics GetStatistics() {
       
       var avg = 0.0;
       var highest = double.MinValue;
@@ -137,8 +147,97 @@ namespace GradeBook
 
       return new Statistics(avg, highest, lowest, letter);
     }
+  }
 
-    
+  public class DiskBook : Book, IBook
+  {
+    public DiskBook(string name) : base(name)
+    {
+    }
 
+    public override event GradeAddedDelegate GradeAdded;
+
+    public override void AddGrade(double grade)
+    {
+      if(grade <= 100 && grade >= 0) {
+        using (StreamWriter sw = File.AppendText($"{this.Name}.txt"))
+        {
+          sw.WriteLine(grade);
+          GradeAdded(this, new EventArgs());
+        }
+      } else {
+        throw new ArgumentException();
+      }
+    }
+
+    public override void AddGrade(string letter)
+    {
+      switch(letter) 
+      {
+        case var le when le == "A" || le == "a":
+          AddGrade(90.0);
+          break;
+        case var le when le == "B" || le == "b":
+          AddGrade(80.0);
+          break;
+        case var le when le == "C" || le == "c":
+          AddGrade(70.0);
+          break;
+        case var le when le == "D" || le == "d":
+          AddGrade(60.0);
+          break;
+        default:
+          AddGrade(0.0);
+          break;
+      }
+    }
+
+    public override List<double> GetGrades()
+    {
+      List<double> grades = new List<double>();
+
+      foreach (string line in File.ReadAllLines($"{this.Name}.txt")) {
+        grades.Add(double.Parse(line));
+      }
+
+      return grades;
+    }
+
+    public override Statistics GetStatistics()
+    {
+      var avg = 0.0;
+      var highest = double.MinValue;
+      var lowest = double.MaxValue;
+      var median = 50.0;
+      var letter = 'F';
+      var grades = GetGrades();
+
+      foreach(var grade in grades) {
+        highest = Math.Max(grade, highest);
+        lowest = Math.Min(grade, lowest);
+        avg += grade;
+      }
+
+      median = grades[grades.Count / 2];
+      avg /= grades.Count;
+
+      switch(avg) 
+      {
+        case var d when d >= 90.0:
+          letter = 'A';
+          break;
+        case var d when d >= 80.0:
+          letter = 'B';
+          break;
+        case var d when d >= 70.0:
+          letter = 'C';
+          break;
+        case var d when d >= 60.0:
+          letter = 'D';
+          break;
+      }
+
+      return new Statistics(avg, highest, lowest, letter);
+    }
   }
 }
