@@ -113,39 +113,7 @@ namespace GradeBook
     }
 
     public override Statistics GetStatistics() {
-      
-      var avg = 0.0;
-      var highest = double.MinValue;
-      var lowest = double.MaxValue;
-      var median = 50.0;
-      var letter = 'F';
-      
-      foreach(var grade in grades) {
-        highest = Math.Max(grade, highest);
-        lowest = Math.Min(grade, lowest);
-        avg += grade;
-      }
-
-      median = grades[grades.Count / 2];
-      avg /= grades.Count;
-
-      switch(avg) 
-      {
-        case var d when d >= 90.0:
-          letter = 'A';
-          break;
-        case var d when d >= 80.0:
-          letter = 'B';
-          break;
-        case var d when d >= 70.0:
-          letter = 'C';
-          break;
-        case var d when d >= 60.0:
-          letter = 'D';
-          break;
-      }
-
-      return new Statistics(avg, highest, lowest, letter);
+      return new Statistics(grades);
     }
   }
 
@@ -163,7 +131,8 @@ namespace GradeBook
         using (StreamWriter sw = File.AppendText($"{this.Name}.txt"))
         {
           sw.WriteLine(grade);
-          GradeAdded(this, new EventArgs());
+          if(GradeAdded != null)
+            GradeAdded(this, new EventArgs());
         }
       } else {
         throw new ArgumentException();
@@ -205,39 +174,9 @@ namespace GradeBook
 
     public override Statistics GetStatistics()
     {
-      var avg = 0.0;
-      var highest = double.MinValue;
-      var lowest = double.MaxValue;
-      var median = 50.0;
-      var letter = 'F';
       var grades = GetGrades();
 
-      foreach(var grade in grades) {
-        highest = Math.Max(grade, highest);
-        lowest = Math.Min(grade, lowest);
-        avg += grade;
-      }
-
-      median = grades[grades.Count / 2];
-      avg /= grades.Count;
-
-      switch(avg) 
-      {
-        case var d when d >= 90.0:
-          letter = 'A';
-          break;
-        case var d when d >= 80.0:
-          letter = 'B';
-          break;
-        case var d when d >= 70.0:
-          letter = 'C';
-          break;
-        case var d when d >= 60.0:
-          letter = 'D';
-          break;
-      }
-
-      return new Statistics(avg, highest, lowest, letter);
+      return new Statistics(grades);
     }
   }
 }
