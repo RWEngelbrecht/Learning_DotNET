@@ -9,7 +9,8 @@ namespace GradeBook
   {
     static void Main(string[] args)
     {
-      InMemoryBook book = new InMemoryBook("Grades");
+      // IBook book = new InMemoryBook("Grades");
+      IBook book = new DiskBook("Grades");
       book.GradeAdded += OnGradeAdded; // cannot assign directly to event
 
       Console.WriteLine("Hello there...\nPlease enter a grade value or enter 'q' to quit:");
@@ -23,11 +24,11 @@ namespace GradeBook
       }
     }
 
-    private static void EnterGrades(Book book)
+    private static void EnterGrades(IBook book)
     {
       var done = false;
-      double grade = 0;
-      char letterGrade = 'E';
+      // double grade = 0;
+      // string letterGrade = "E";
 
       while (!done)
       {
@@ -46,15 +47,12 @@ namespace GradeBook
 
         try
         {
-          if (!Regex.IsMatch(input, @"[a-dA-DfF]"))
-          {
-            grade = double.Parse(input);
-          }
+          if(!Regex.IsMatch(input, @"[a-dA-DfF]"))
+            book.AddGrade(double.Parse(input));
+          else if(input.Length == 1)
+            book.AddGrade(input);
           else
-          {
-            letterGrade = input[0];
-          }
-          book.AddGrade(letterGrade != 'E' ? letterGrade : grade);
+            throw new ArgumentException("Come now, let's be serious...");
         }
         catch (ArgumentException e)
         {
