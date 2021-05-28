@@ -53,7 +53,7 @@ namespace GradeBook
     List<double> grades;
     public override event GradeAddedDelegate GradeAdded;
 
-  // Original way of creating property property:
+  // Original way of creating property:
     // public string Name {
     //   get {                  //explicitly set what getter and setter does
     //     return name;

@@ -27,8 +27,6 @@ namespace GradeBook
     private static void EnterGrades(IBook book)
     {
       var done = false;
-      // double grade = 0;
-      // string letterGrade = "E";
 
       while (!done)
       {
