@@ -22,13 +22,23 @@ namespace aspNet.Controllers
         /// api/projects/{pid}/tickets?tid={tid}
         /// </summary>
         /// <returns></returns>
+        // [HttpGet]
+        // [Route("/api/projects/{pid}/tickets")]
+        // public IActionResult GetProjectTicket(int pid, [FromQuery] int tid) //model binding from route and query
+        // {
+        //     if(tid == 0)
+        //         return Ok($"Reading all tickets in project {pid}");
+        //     return Ok($"Reading project {pid}, ticket {tid}");
+        // }
         [HttpGet]
         [Route("/api/projects/{pid}/tickets")]
-        public IActionResult GetProjectTicket(int pid, [FromQuery] int tid) //model binding from route and query
+        public IActionResult GetProjectTicket([FromQuery]Ticket ticket) //model binding from route and query
         {
-            if(tid == 0)
-                return Ok($"Reading all tickets in project {pid}");
-            return Ok($"Reading project {pid}, ticket {tid}");
+            if(ticket == null)
+                return BadRequest("Not all needed parameters were provided...");
+            else if(ticket.TicketId == 0)
+                return Ok($"Reading all tickets in project {ticket.ProjectId}");
+            return Ok($"Reading project {ticket.ProjectId}, ticket {ticket.TicketId}, title: {ticket.Title}, description: {ticket.Description}");
         }
 
         [HttpPost]
