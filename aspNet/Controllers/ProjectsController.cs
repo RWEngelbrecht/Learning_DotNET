@@ -18,6 +18,19 @@ namespace aspNet.Controllers
             return Ok($"Reading project {id}...");
         }
 
+        /// <summary>
+        /// api/projects/{pid}/tickets?tid={tid}
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("/api/projects/{pid}/tickets")]
+        public IActionResult GetProjectTicket(int pid, [FromQuery] int tid) //model binding from route and query
+        {
+            if(tid == 0)
+                return Ok($"Reading all tickets in project {pid}");
+            return Ok($"Reading project {pid}, ticket {tid}");
+        }
+
         [HttpPost]
         public IActionResult Post()
         {
